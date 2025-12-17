@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
-import { DatabaseService } from './database.service';
+import { Module, Global } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
 
+@Global() // Hacemos global para no importarlo en cada sub-módulo de las apps
 @Module({
-  providers: [DatabaseService],
-  exports: [DatabaseService],
+  providers: [PrismaService],
+  exports: [PrismaService],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }
