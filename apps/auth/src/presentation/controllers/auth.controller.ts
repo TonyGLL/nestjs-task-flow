@@ -9,7 +9,7 @@ import { LoginDto } from '../../application/dtos/login.dto';
  * AuthController handles incoming HTTP requests related to authentication.
  * It delegates the business logic to specific use cases.
  */
-@ApiTags('Auth Module')
+@ApiTags('Auth Controller')
 @Controller('auth')
 export class AuthController {
   constructor(
