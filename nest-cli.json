@@ -10,15 +10,6 @@
   "monorepo": true,
   "root": "apps/task-flow-backend",
   "projects": {
-    "api-gateway": {
-      "type": "application",
-      "root": "apps/api-gateway",
-      "entryFile": "main",
-      "sourceRoot": "apps/api-gateway/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
-      }
-    },
     "auth": {
       "type": "application",
       "root": "apps/auth",
@@ -44,15 +35,6 @@
       "sourceRoot": "libs/database/src",
       "compilerOptions": {
         "tsConfigPath": "libs/database/tsconfig.lib.json"
-      }
-    },
-    "task-flow-backend": {
-      "type": "application",
-      "root": "apps/task-flow-backend",
-      "entryFile": "main",
-      "sourceRoot": "apps/task-flow-backend/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/task-flow-backend/tsconfig.app.json"
       }
     }
   }
