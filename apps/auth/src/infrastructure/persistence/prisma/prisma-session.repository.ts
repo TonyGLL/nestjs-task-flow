@@ -8,8 +8,16 @@ export class PrismaSessionRepository implements SessionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: Partial<UserSession>): Promise<UserSession> {
-    const session = await this.prisma.userSession.create({
-      data: {
+    const session = await this.prisma.userSession.upsert({
+      where: {
+        token: data.token!,
+        userId: data.userId!,
+      },
+      update: {
+        expiresAt: data.expiresAt!,
+        token: data.token!,
+      },
+      create: {
         userId: data.userId!,
         token: data.token!,
         expiresAt: data.expiresAt!,

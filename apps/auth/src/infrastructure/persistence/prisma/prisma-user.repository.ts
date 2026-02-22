@@ -11,17 +11,27 @@ export class PrismaUserRepository implements UserRepository {
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
-      include: { passwords: { orderBy: { createdAt: 'desc' }, take: 1 } },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        lastLoginAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     if (!user) return null;
 
-    const domainUser = UserMapper.toDomain(user);
-    // We attach the password hash for the use case to use.
-    // In a more complex domain, we might handle this differently.
-    (domainUser as any).passwordHash = user.passwords[0]?.hash;
+    return UserMapper.toDomain(user);
+  }
 
-    return domainUser;
+  async getUserPassword(userId: string): Promise<string | null> {
+    const password = await this.prisma.password.findFirst({
+      where: { userId },
+      select: { hash: true },
+    });
+    return password ? password.hash : null;
   }
 
   async findById(id: string): Promise<User | null> {
@@ -60,5 +70,14 @@ export class PrismaUserRepository implements UserRepository {
     });
 
     return UserMapper.toDomain(user);
+  }
+
+  async updateUserLastLoginAt(id: string, lastLoginAt: Date): Promise<void> {
+    await this.prisma.user.update({
+      where: { id },
+      data: {
+        lastLoginAt,
+      },
+    });
   }
 }

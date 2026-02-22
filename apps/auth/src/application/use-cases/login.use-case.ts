@@ -29,24 +29,34 @@ export class LoginUseCase {
       throw new InvalidCredentialsException();
     }
 
-    const passwordHash = (user as { passwordHash?: string }).passwordHash;
-
-    if (!passwordHash) {
+    const userPasswordHashed = await this.userRepository.getUserPassword(
+      user.id,
+    );
+    if (!userPasswordHashed) {
       throw new InvalidCredentialsException();
     }
 
-    const isPasswordValid = await this.passwordHasher.compare(dto.password, passwordHash);
+    const isPasswordValid = await this.passwordHasher.compare(
+      dto.password,
+      userPasswordHashed,
+    );
+    console.log(dto.password, userPasswordHashed);
     if (!isPasswordValid) {
       throw new InvalidCredentialsException();
     }
 
-    const token = this.tokenService.generate({ sub: user.id, email: user.email });
+    const token = this.tokenService.generate({
+      sub: user.id,
+      email: user.email,
+    });
 
     await this.sessionRepository.create({
       userId: user.id,
       token,
       expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
     });
+
+    await this.userRepository.updateUserLastLoginAt(user.id, new Date());
 
     return {
       user,
