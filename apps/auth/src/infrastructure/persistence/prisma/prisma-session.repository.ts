@@ -11,7 +11,6 @@ export class PrismaSessionRepository implements SessionRepository {
     const session = await this.prisma.userSession.upsert({
       where: {
         token: data.token!,
-        userId: data.userId!,
       },
       update: {
         expiresAt: data.expiresAt!,

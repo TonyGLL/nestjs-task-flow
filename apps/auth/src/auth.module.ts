@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { DatabaseModule } from '@app/database';
+import { JWT_EXPIRATION_TIME } from '@app/common';
 import { AuthController } from './presentation/controllers/auth.controller';
 import { RegisterUserUseCase } from './application/use-cases/register-user.use-case';
 import { LoginUseCase } from './application/use-cases/login.use-case';
@@ -9,7 +10,7 @@ import { PrismaUserRepository } from './infrastructure/persistence/prisma/prisma
 import { SESSION_REPOSITORY } from './domain/repositories/session.repository';
 import { PrismaSessionRepository } from './infrastructure/persistence/prisma/prisma-session.repository';
 import { I_PASSWORD_HASHER } from './application/ports/password-hasher.interface';
-import { BunPasswordHasher } from './infrastructure/services/bun-password-hasher.service';
+import { BcryptPasswordHasher } from './infrastructure/services/bcrypt-password-hasher.service';
 import { I_TOKEN_SERVICE } from './application/ports/token-service.interface';
 import { JwtTokenService } from './infrastructure/services/jwt-token.service';
 
@@ -18,7 +19,7 @@ import { JwtTokenService } from './infrastructure/services/jwt-token.service';
     DatabaseModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'secret',
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: JWT_EXPIRATION_TIME },
     }),
   ],
   controllers: [AuthController],
@@ -35,7 +36,7 @@ import { JwtTokenService } from './infrastructure/services/jwt-token.service';
     },
     {
       provide: I_PASSWORD_HASHER,
-      useClass: BunPasswordHasher,
+      useClass: BcryptPasswordHasher,
     },
     {
       provide: I_TOKEN_SERVICE,
