@@ -14,9 +14,14 @@ import { BcryptPasswordHasher } from './infrastructure/services/bcrypt-password-
 import { I_TOKEN_SERVICE } from './application/ports/token-service.interface';
 import { JwtTokenService } from './infrastructure/services/jwt-token.service';
 
+/**
+ * AuthModule is the main module for the authentication microservice.
+ * It configures dependencies, controllers, and providers.
+ */
 @Module({
   imports: [
     DatabaseModule,
+    // Configure JwtModule with a secret and expiration time from constants.
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'secret',
       signOptions: { expiresIn: JWT_EXPIRATION_TIME },
@@ -24,8 +29,10 @@ import { JwtTokenService } from './infrastructure/services/jwt-token.service';
   ],
   controllers: [AuthController],
   providers: [
+    // Use cases contain the business logic.
     RegisterUserUseCase,
     LoginUseCase,
+    // Dependency Injection configuration for repositories and services using interfaces (tokens).
     {
       provide: USER_REPOSITORY,
       useClass: PrismaUserRepository,
@@ -45,7 +52,11 @@ import { JwtTokenService } from './infrastructure/services/jwt-token.service';
   ],
 })
 export class AuthModule implements NestModule {
+  /**
+   * Configure global middleware for the module.
+   */
   configure(consumer: MiddlewareConsumer) {
+    // Apply LoggerMiddleware to all routes for request/response logging.
     consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }

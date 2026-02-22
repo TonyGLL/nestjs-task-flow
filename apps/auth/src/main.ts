@@ -4,8 +4,17 @@ import { AuthModule } from './auth.module';
 import { AllExceptionsFilter, setupSwagger } from '@app/common';
 
 async function bootstrap() {
+  /**
+   * Initialize the NestJS application with the AuthModule.
+   */
   const app = await NestFactory.create(AuthModule);
 
+  /**
+   * Set up global validation pipe.
+   * - whitelist: strips away non-whitelisted properties from the DTO.
+   * - forbidNonWhitelisted: throws an error if non-whitelisted properties are present.
+   * - transform: automatically transforms payloads to be objects typed according to their DTO classes.
+   */
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -14,8 +23,14 @@ async function bootstrap() {
     }),
   );
 
+  /**
+   * Apply a global filter to handle all exceptions and provide a consistent error response format.
+   */
   app.useGlobalFilters(new AllExceptionsFilter());
 
+  /**
+   * Configure Swagger/OpenAPI documentation.
+   */
   setupSwagger(app, {
     title: 'Auth Service',
     description: 'The authentication service API description',
