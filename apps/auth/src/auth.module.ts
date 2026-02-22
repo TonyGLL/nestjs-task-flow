@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { DatabaseModule } from '@app/database';
-import { JWT_EXPIRATION_TIME } from '@app/common';
+import { JWT_EXPIRATION_TIME, LoggerMiddleware } from '@app/common';
 import { AuthController } from './presentation/controllers/auth.controller';
 import { RegisterUserUseCase } from './application/use-cases/register-user.use-case';
 import { LoginUseCase } from './application/use-cases/login.use-case';
@@ -44,4 +44,8 @@ import { JwtTokenService } from './infrastructure/services/jwt-token.service';
     },
   ],
 })
-export class AuthModule {}
+export class AuthModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
