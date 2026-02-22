@@ -1,6 +1,8 @@
-export class InvalidCredentialsException extends Error {
+import { DomainException } from '@app/common';
+import { HttpStatus } from '@nestjs/common';
+
+export class InvalidCredentialsException extends DomainException {
   constructor() {
-    super('Invalid credentials');
-    this.name = 'InvalidCredentialsException';
+    super('Invalid credentials', HttpStatus.UNAUTHORIZED);
   }
 }

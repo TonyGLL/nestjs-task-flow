@@ -1,6 +1,8 @@
-export class UserAlreadyExistsException extends Error {
+import { DomainException } from '@app/common';
+import { HttpStatus } from '@nestjs/common';
+
+export class UserAlreadyExistsException extends DomainException {
   constructor() {
-    super('User already exists');
-    this.name = 'UserAlreadyExistsException';
+    super('User already exists', HttpStatus.CONFLICT);
   }
 }
