@@ -13,6 +13,7 @@ import {
   I_TOKEN_SERVICE,
   type ITokenService,
 } from '../ports/token-service.interface';
+import { SESSION_EXPIRATION_MS } from '@app/common';
 
 @Injectable()
 export class RegisterUserUseCase {
@@ -49,7 +50,7 @@ export class RegisterUserUseCase {
     await this.sessionRepository.create({
       userId: createdUser.id,
       token,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
+      expiresAt: new Date(Date.now() + SESSION_EXPIRATION_MS),
     });
 
     await this.userRepository.updateUserLastLoginAt(createdUser.id, new Date());

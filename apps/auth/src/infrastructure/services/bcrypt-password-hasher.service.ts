@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { IPasswordHasher } from '../../application/ports/password-hasher.interface';
-import bcryptjs from 'node_modules/bcryptjs';
+import * as bcryptjs from 'bcryptjs';
 
 @Injectable()
-export class BunPasswordHasher implements IPasswordHasher {
+export class BcryptPasswordHasher implements IPasswordHasher {
   async hash(password: string): Promise<string> {
     return await bcryptjs.hash(password, 10);
   }

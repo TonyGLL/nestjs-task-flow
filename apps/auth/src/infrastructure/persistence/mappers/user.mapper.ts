@@ -7,7 +7,7 @@ export class UserMapper {
       prismaUser.id,
       prismaUser.email,
       prismaUser.name,
-      prismaUser.lastLoginAt as Date | null,
+      prismaUser.lastLoginAt,
       prismaUser.createdAt,
       prismaUser.updatedAt,
     );

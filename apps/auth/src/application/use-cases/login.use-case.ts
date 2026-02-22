@@ -9,6 +9,7 @@ import type { ITokenService } from '../ports/token-service.interface';
 import { SESSION_REPOSITORY } from '../../domain/repositories/session.repository';
 import type { SessionRepository } from '../../domain/repositories/session.repository';
 import { InvalidCredentialsException } from '../../domain/exceptions/invalid-credentials.exception';
+import { SESSION_EXPIRATION_MS } from '@app/common';
 
 @Injectable()
 export class LoginUseCase {
@@ -52,7 +53,7 @@ export class LoginUseCase {
     await this.sessionRepository.create({
       userId: user.id,
       token,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
+      expiresAt: new Date(Date.now() + SESSION_EXPIRATION_MS),
     });
 
     await this.userRepository.updateUserLastLoginAt(user.id, new Date());
