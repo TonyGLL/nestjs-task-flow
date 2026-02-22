@@ -33,6 +33,12 @@
       ],
       "@app/database/*": [
         "libs/database/src/*"
+      ],
+      "@generated": [
+        "generated/prisma"
+      ],
+      "@generated/*": [
+        "generated/prisma/*"
       ]
     }
   }
