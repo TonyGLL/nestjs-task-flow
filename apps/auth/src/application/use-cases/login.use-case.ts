@@ -40,7 +40,6 @@ export class LoginUseCase {
       dto.password,
       userPasswordHashed,
     );
-    console.log(dto.password, userPasswordHashed);
     if (!isPasswordValid) {
       throw new InvalidCredentialsException();
     }
