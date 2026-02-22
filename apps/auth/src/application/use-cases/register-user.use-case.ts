@@ -15,6 +15,10 @@ import {
 } from '../ports/token-service.interface';
 import { SESSION_EXPIRATION_MS } from '@app/common';
 
+/**
+ * RegisterUserUseCase handles the logic for creating a new user in the system.
+ * It follows the Clean Architecture pattern, depending only on interfaces (ports).
+ */
 @Injectable()
 export class RegisterUserUseCase {
   constructor(
@@ -28,31 +32,46 @@ export class RegisterUserUseCase {
     private readonly sessionRepository: SessionRepository,
   ) {}
 
+  /**
+   * Orchestrates the user registration process.
+   * 1. Checks if the user already exists.
+   * 2. Hashes the user's password.
+   * 3. Creates the user in the repository.
+   * 4. Generates an initial JWT token.
+   * 5. Creates a session for the user.
+   * 6. Updates the last login timestamp.
+   */
   async execute(dto: RegisterUserDto) {
+    // Check if a user with the given email already exists.
     const existingUser = await this.userRepository.findByEmail(dto.email);
     if (existingUser) {
       throw new UserAlreadyExistsException();
     }
 
+    // Securely hash the password before storing it.
     const passwordHash = await this.passwordHasher.hash(dto.password);
 
+    // Save the new user to the database.
     const createdUser = await this.userRepository.create({
       email: dto.email,
       name: dto.name,
       passwordHash,
     });
 
+    // Generate a JWT for the new user.
     const token = this.tokenService.generate({
       sub: createdUser.id,
       email: createdUser.email,
     });
 
+    // Persist the session information.
     await this.sessionRepository.create({
       userId: createdUser.id,
       token,
       expiresAt: new Date(Date.now() + SESSION_EXPIRATION_MS),
     });
 
+    // Mark the user as logged in.
     await this.userRepository.updateUserLastLoginAt(createdUser.id, new Date());
 
     return {

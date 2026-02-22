@@ -9,10 +9,19 @@ import {
 import { Request, Response } from 'express';
 import { DomainException } from '../exceptions/domain.exception';
 
+/**
+ * AllExceptionsFilter is a global filter that catches all unhandled exceptions.
+ * It formats the error response into a consistent JSON structure.
+ */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
+  /**
+   * Method called when an exception is caught.
+   * @param exception The caught exception object.
+   * @param host The execution context.
+   */
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -22,26 +31,31 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let message: string | object = 'Internal server error';
     let error = 'Internal Server Error';
 
+    // Handle NestJS built-in HttpExceptions.
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const res = exception.getResponse();
       message = typeof res === 'object' ? (res as any).message || res : res;
       error = (res as any).error || exception.name;
-    } else if (exception instanceof DomainException) {
+    }
+    // Handle custom DomainExceptions defined in our business logic.
+    else if (exception instanceof DomainException) {
       status = exception.status;
       message = exception.message;
       error = exception.name;
-    } else if (exception instanceof Error) {
-      // Handle generic errors
+    }
+    // Handle generic JavaScript Errors.
+    else if (exception instanceof Error) {
       message = exception.message;
       error = exception.name;
 
-      // Map some known common error types if necessary
+      // Map specific error names to appropriate HTTP status codes.
       if (exception.name === 'UnauthorizedError') {
           status = HttpStatus.UNAUTHORIZED;
       }
     }
 
+    // Build the standardized error response body.
     const responseBody = {
       statusCode: status,
       timestamp: new Date().toISOString(),
@@ -50,6 +64,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       error,
     };
 
+    // Log the error. Use 'error' level for 5xx and 'warn' for others.
     if (status >= 500) {
       this.logger.error(
         `[${request.method}] ${request.url} - Status: ${status} - Error: ${JSON.stringify(exception)}`,
@@ -61,6 +76,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
     }
 
+    // Send the response back to the client.
     response.status(status).json(responseBody);
   }
 }
