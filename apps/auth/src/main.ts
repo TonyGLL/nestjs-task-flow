@@ -25,7 +25,9 @@ async function bootstrap() {
 
   const port = process.env.port ?? 3000;
   await app.listen(port);
-  console.log(`[Auth service] running on port ${port}`);
-  console.log(`[Auth service] swagger docs available at http://localhost:${port}/docs`);
+  console.log('[Auth service] running on port:', port);
+  console.log(
+    `[Auth service] swagger docs available at http://localhost:${port}/docs`,
+  );
 }
 void bootstrap();
