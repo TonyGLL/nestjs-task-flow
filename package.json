@@ -21,6 +21,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
+    "build:auth": "nest build auth",
     "dev:auth": "nest start auth --watch"
   },
   "dependencies": {
