@@ -1,0 +1,77 @@
+name: CI - Monorepo Scalable
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # 1. Detectar qué aplicaciones han cambiado para optimizar el pipeline
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          # Aquí definimos los filtros por cada app.
+          # Con 100+ apps, este archivo se generaría dinámicamente o se usaría Nx.
+          filters: |
+            auth:
+              - 'apps/auth/**'
+              - 'libs/**'
+              - 'package.json'
+              - 'prisma/**'
+
+  # 2. Build, Lint y Test de las aplicaciones afectadas
+  validate:
+    needs: changes
+    if: ${{ needs.changes.outputs.apps != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Ejecuta el build en paralelo para cada app afectada
+        app: ${{ fromJson(needs.changes.outputs.apps) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: bun x prisma generate
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Run Tests
+        run: bun run test --projects apps/${{ matrix.app }}
+
+      - name: Build Application
+        run: bun run build ${{ matrix.app }}
+
+      # 3. Construcción y Push de Docker (solo si es push a main/develop)
+      - name: Build Docker Image
+        if: github.event_name == 'push'
+        run: |
+          docker build \
+            --build-arg APP_NAME=${{ matrix.app }} \
+            -t ${{ secrets.DOCKER_REGISTRY }}/taskflow-${{ matrix.app }}:${{ github.sha }} .
+          # docker push ${{ secrets.DOCKER_REGISTRY }}/taskflow-${{ matrix.app }}:${{ github.sha }}
