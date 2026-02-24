@@ -33,7 +33,12 @@ describe('PrismaSessionRepository', () => {
   describe('create', () => {
     it('should upsert a session and return it', async () => {
       const data = { userId: '1', token: 't', expiresAt: new Date() };
-      const prismaSession = { id: 's1', ...data, createdAt: new Date(), updatedAt: new Date() };
+      const prismaSession = {
+        id: 's1',
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       prismaService.userSession.upsert.mockResolvedValue(prismaSession);
 
       const result = await repository.create(data);
@@ -46,7 +51,14 @@ describe('PrismaSessionRepository', () => {
 
   describe('findByToken', () => {
     it('should return a session if found', async () => {
-      const prismaSession = { id: 's1', userId: '1', token: 't', expiresAt: new Date(), createdAt: new Date(), updatedAt: new Date() };
+      const prismaSession = {
+        id: 's1',
+        userId: '1',
+        token: 't',
+        expiresAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       prismaService.userSession.findUnique.mockResolvedValue(prismaSession);
 
       const result = await repository.findByToken('t');
@@ -58,14 +70,18 @@ describe('PrismaSessionRepository', () => {
   describe('deleteByToken', () => {
     it('should delete a session', async () => {
       await repository.deleteByToken('t');
-      expect(prismaService.userSession.delete).toHaveBeenCalledWith({ where: { token: 't' } });
+      expect(prismaService.userSession.delete).toHaveBeenCalledWith({
+        where: { token: 't' },
+      });
     });
   });
 
   describe('deleteByUserId', () => {
     it('should delete all sessions for a user', async () => {
       await repository.deleteByUserId('u1');
-      expect(prismaService.userSession.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
+      expect(prismaService.userSession.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'u1' },
+      });
     });
   });
 });

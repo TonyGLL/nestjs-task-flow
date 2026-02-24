@@ -15,7 +15,7 @@ import { DomainException } from '../exceptions/domain.exception';
  */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionsFilter.name);
+  constructor(private readonly logger = new Logger(AllExceptionsFilter.name)) {}
 
   /**
    * Method called when an exception is caught.
@@ -66,8 +66,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // Log the error. Use 'error' level for 5xx and 'warn' for others.
     if (status >= 500) {
+      const logMessage = exception instanceof Error ? exception.message : JSON.stringify(exception);
       this.logger.error(
-        `[${request.method}] ${request.url} - Status: ${status} - Error: ${JSON.stringify(exception)}`,
+        `[${request.method}] ${request.url} - Status: ${status} - Error: ${logMessage}`,
         exception instanceof Error ? exception.stack : undefined,
       );
     } else {
