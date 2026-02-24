@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.vscode
+*.log
+.env
+README.md
+SCALING_PLAN.md
+Dockerfile
+.dockerignore
+docs
+tests
+coverage
