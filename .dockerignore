@@ -1,5 +1,6 @@
 node_modules
 dist
+build
 .git
 .vscode
 *.log
@@ -11,3 +12,7 @@ Dockerfile
 docs
 tests
 coverage
+/generated/prisma
+bun.lock
+yarn.lock
+package-lock.json
