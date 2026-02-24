@@ -35,8 +35,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const res = exception.getResponse();
-      message = typeof res === 'object' ? (res as any).message || res : res;
-      error = (res as any).error || exception.name;
+      if (typeof res === 'object' && res !== null) {
+        const resBody = res as Record<string, unknown>;
+        message = (resBody.message as string | object) || res;
+        error = (resBody.error as string) || exception.name;
+      } else {
+        message = res;
+        error = exception.name;
+      }
     }
     // Handle custom DomainExceptions defined in our business logic.
     else if (exception instanceof DomainException) {
@@ -51,7 +57,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
       // Map specific error names to appropriate HTTP status codes.
       if (exception.name === 'UnauthorizedError') {
-          status = HttpStatus.UNAUTHORIZED;
+        status = HttpStatus.UNAUTHORIZED;
       }
     }
 
@@ -65,8 +71,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
 
     // Log the error. Use 'error' level for 5xx and 'warn' for others.
-    if (status >= 500) {
-      const logMessage = exception instanceof Error ? exception.message : JSON.stringify(exception);
+    if ((status as number) >= 500) {
+      const logMessage =
+        exception instanceof Error
+          ? exception.message
+          : JSON.stringify(exception);
       this.logger.error(
         `[${request.method}] ${request.url} - Status: ${status} - Error: ${logMessage}`,
         exception instanceof Error ? exception.stack : undefined,
